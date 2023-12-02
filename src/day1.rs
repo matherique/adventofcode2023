@@ -12,7 +12,7 @@ treb7uchet      77
 fn main() -> Result<()> {
     let content = utils::read_file("1")?;
 
-    let letters = [
+    let _letters = [
         "zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine",
     ];
 
