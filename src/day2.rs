@@ -1,22 +1,17 @@
-use std::collections::HashMap;
-
 mod utils;
 
 fn main() {
     let content = utils::read_file("2").unwrap();
 
     let mut result = 0;
-    let mut maximum: HashMap<&str, usize> = HashMap::new();
-
-    maximum.insert("green", 13);
-    maximum.insert("red", 12);
-    maximum.insert("blue", 14);
 
     content.trim_end().lines().for_each(|line| {
-        let (game_id, data) = line.split_once(":").unwrap();
-        let (_, id) = game_id.split_once(" ").unwrap();
+        let (_, data) = line.split_once(":").unwrap();
 
-        let mut is_valid = true;
+        let mut green: Vec<usize> = Vec::new();
+        let mut blue: Vec<usize> = Vec::new();
+        let mut red: Vec<usize> = Vec::new();
+
         data.split(";").for_each(|player| {
             let subsets: Vec<(&str, &str)> = player
                 .split(",")
@@ -25,16 +20,21 @@ fn main() {
 
             for ss in subsets {
                 let qtd = ss.0.parse::<usize>().unwrap_or(0);
-                if qtd > *maximum.get(ss.1).unwrap() {
-                    is_valid = false;
-                    return;
+
+                match ss.1 {
+                    "red" => red.push(qtd),
+                    "green" => green.push(qtd),
+                    "blue" => blue.push(qtd),
+                    _ => panic!("invalid color"),
                 }
             }
         });
 
-        if is_valid {
-            result += id.parse::<i32>().unwrap();
-        }
+        let max_green = green.iter().max().unwrap_or(&0);
+        let max_red = red.iter().max().unwrap_or(&0);
+        let max_blue = blue.iter().max().unwrap_or(&0);
+
+        result += max_red * max_blue * max_green;
     });
 
     println!("{}", result)
