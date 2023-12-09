@@ -1,4 +1,4 @@
-use std::io::Result;
+use std::{collections::HashMap, io::Result};
 
 mod utils;
 
@@ -40,6 +40,12 @@ fn is_symble2(table: &Vec<Vec<char>>, x: i32, y: i32) -> bool {
     }
 }
 
+#[derive(Debug)]
+struct Number {
+    symble_pos: String,
+    number: usize,
+}
+
 fn main() -> Result<()> {
     let content = utils::read_file("3")?;
 
@@ -50,7 +56,9 @@ fn main() -> Result<()> {
         .map(|line| line.chars().collect::<Vec<char>>())
         .collect();
 
-    let mut total: usize = 0;
+    // let mut response: Vec<Number> = Vec::new();
+    let mut pairs: Vec<String> = Vec::new();
+    let mut map: HashMap<String, usize> = HashMap::new();
 
     for (x, line) in content.lines().enumerate() {
         let end = line.len() - 1;
@@ -71,32 +79,60 @@ fn main() -> Result<()> {
                 continue;
             }
 
+            let numparse = num.parse::<usize>().unwrap();
             if start != 0 && is_symble(table[x][start - 1]) {
                 y += 1;
-                total += num.parse::<usize>().unwrap();
-                println!("{}", num);
+                let pos = format!("({},{})", x, start - 1);
+                if let Some(_) = map.get(&pos) {
+                    pairs.push(pos.clone());
+                }
+
+                *map.entry(pos.clone()).or_insert(1) *= numparse;
                 continue;
             }
 
             if is_symble2(&table, x as i32, y as i32) {
-                total += num.parse::<usize>().unwrap();
-                println!("{}", num);
                 y += 1;
+                let pos = format!("({},{})", x, y);
+                if let Some(_) = map.get(&pos) {
+                    pairs.push(pos.clone());
+                }
+                *map.entry(pos.clone()).or_insert(1) *= numparse;
                 continue;
             }
 
             for a in (start as i32 - 1)..(y as i32 + 1) {
-                if is_symble2(&table, x as i32 - 1, a as i32)
-                    || is_symble2(&table, x as i32 + 1, a as i32)
-                {
-                    total += num.parse::<usize>().unwrap();
-                    break;
+                if is_symble2(&table, x as i32 - 1, a as i32) {
+                    let pos = format!("({},{})", x - 1, a);
+                    if let Some(_) = map.get(&pos) {
+                        pairs.push(pos.clone());
+                    }
+
+                    *map.entry(pos.clone()).or_insert(1) *= numparse;
+                    continue;
+                }
+
+                if is_symble2(&table, x as i32 + 1, a as i32) {
+                    let pos = format!("({},{})", x + 1, a);
+                    if let Some(_) = map.get(&pos) {
+                        pairs.push(pos.clone());
+                    }
+
+                    *map.entry(pos.clone()).or_insert(1) *= numparse;
+                    continue;
                 }
             }
         }
     }
 
-    println!("{}", total);
+    let mut total = 0;
+    for p in &pairs {
+        if let Some(v) = map.get(p) {
+            total += *v;
+        }
+    }
+
+    println!("{:?}", total);
 
     Ok(())
 }
