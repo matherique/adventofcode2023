@@ -4,3 +4,5 @@
 	cargo run --bin day2
 3: 
 	cargo run --bin day3
+4: 
+	cargo test --bin day4
